@@ -1,0 +1,23 @@
+# Web Sequence Diagram https://www.websequencediagrams.com/
+
+note over browser:
+user enters a string in the text input
+user submits the form
+browser pushes and renders new note locally
+browser submits /new_note POST form
+end note
+
+browser->server: HTTP POST https://fullstack-exampleapp.herokuapp.com/new_note_spa
+
+note over server:
+server processes the submitted form
+and pushes the request body to the array
+server then returns a 201 Created status code
+with the message: 'note created'
+end note
+
+server-->browser: {"message":"note created"}
+
+note over browser:
+browser console logs the response
+end note
