@@ -1,0 +1,1 @@
+Solution of Exercises 2.6.-2.10.
