@@ -1,0 +1,16 @@
+{
+  "name": "cli-db",
+  "version": "1.0.0",
+  "description": "",
+  "main": "mongo.js",
+  "dependencies": {
+    "mongoose": "^5.9.22"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start":"node mongo.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
