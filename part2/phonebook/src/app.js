@@ -96,9 +96,10 @@ const App = () => {
 			})
 			.catch((err) => {
 				console.log(err)
+				console.log(err.response)
 				setNotificationTimeout({
 					error: true,
-					message: `Could not read the phonebook. Please try again later.`,
+					message: err.response.data.message || `Could not read the phonebook. Please try again later.`,
 				})
 			})
 	}
@@ -120,9 +121,10 @@ const App = () => {
 			})
 			.catch((err) => {
 				console.log(err)
+				console.log(err.response)
 				setNotificationTimeout({
 					error: true,
-					message: `${contact.name} could not be added to the phonebook. Please try again later.`,
+					message: err.response.data.message || `${contact.name} could not be added to the phonebook. Please try again later.`,
 				})
 			})
 	}
@@ -145,9 +147,10 @@ const App = () => {
 				})
 				.catch((err) => {
 					console.log(err)
+					console.log(err.response)
 					setNotificationTimeout({
 						error: true,
-						message: `Could not update ${contact.name} in the phonebook. Please try again later.`,
+						message: err.response.data.message || `Could not update ${contact.name} in the phonebook. Please try again later.`,
 					})
 				})
 		}
@@ -169,9 +172,10 @@ const App = () => {
 				})
 				.catch((err) => {
 					console.log(err)
+					console.log(err.response)
 					setNotificationTimeout({
 						error: true,
-						message: `Could not find ${contact.name} in the phonebook, perhaps it was already removed?`,
+						message: err.response.data.message || `Could not find ${contact.name} in the phonebook, perhaps it was already removed?`,
 					})
 				})
 		}
