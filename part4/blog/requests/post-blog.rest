@@ -1,9 +1,10 @@
 POST http://127.0.0.1:3001/api/blogs
 Content-Type: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFsYW4iLCJpZCI6IjVmNzJmNTlhN2VlNzRlM2I0ODc3MzEzYiIsImlhdCI6MTYwMTM3MzA1OH0.nYHVZ7l4IDsijd2H2IzEudf2YXWNwtlThHMIrauGc1U
 
 {
-    "title": "The beginning",
-    "author": "Mike",
+    "title": "The beginning 3",
     "url": "https://fullstackopen.com/static/f800638504cdf371a12947fc31d52030/part-4.svg",
-    "likes": 2
+    "likes": 4,
+	"userId": "5f70902298674239003ec38d"
 }

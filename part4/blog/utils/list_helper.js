@@ -23,55 +23,55 @@ const favoriteBlog = (blogs) => {
 const totalLikes = (blogs) => blogs.reduce((total, blog) => total + blog.likes, 0)
 
 const favoriteBlog = ([ ...blogs ]) => {
-    if (!blogs.length) return []
+	if (!blogs.length) return []
 
-   return blogs.sort((a, b) => b.likes - a.likes)[0]
+	return blogs.sort((a, b) => b.likes - a.likes)[0]
 }
 
 const mostBlogs = (blogs) => {
-    if (!blogs.length) return ""
+	if (!blogs.length) return ""
 
-    let arr = []
+	let arr = []
 
-    for (let i = 0; i < blogs.length; i++) {
-        let found = -1
-        for (let j = 0; j < arr.length; j++) {
-            if (arr[j].author == blogs[i].author) found = j
-        }
-        if (found > -1) {
-            arr[found].blogs++
-        } else {
-            arr.push({
-                author: blogs[i].author,
-                blogs: 1
-            })
-        }
-    }
+	for (let i = 0; i < blogs.length; i++) {
+		let found = -1
+		for (let j = 0; j < arr.length; j++) {
+			if (arr[j].author === blogs[i].author) found = j
+		}
+		if (found > -1) {
+			arr[found].blogs++
+		} else {
+			arr.push({
+				author: blogs[i].author,
+				blogs: 1
+			})
+		}
+	}
 
-    return arr.sort((a, b) => b.blogs - a.blogs)[0]
+	return arr.sort((a, b) => b.blogs - a.blogs)[0]
 }
 
 const mostLikes = (blogs) => {
-    if (!blogs.length) return ""
+	if (!blogs.length) return ""
 
-    let arr = []
+	let arr = []
 
-    for (let i = 0; i < blogs.length; i++) {
-        let found = -1
-        for (let j = 0; j < arr.length; j++) {
-            if (arr[j].author == blogs[i].author) found = j
-        }
-        if (found > -1) {
-            arr[found].likes += blogs[i].likes
-        } else {
-            arr.push({
-                author: blogs[i].author,
-                likes: blogs[i].likes
-            })
-        }
-    }
+	for (let i = 0; i < blogs.length; i++) {
+		let found = -1
+		for (let j = 0; j < arr.length; j++) {
+			if (arr[j].author === blogs[i].author) found = j
+		}
+		if (found > -1) {
+			arr[found].likes += blogs[i].likes
+		} else {
+			arr.push({
+				author: blogs[i].author,
+				likes: blogs[i].likes
+			})
+		}
+	}
 
-    return arr.sort((a, b) => b.likes - a.likes)[0]
+	return arr.sort((a, b) => b.likes - a.likes)[0]
 }
 
 module.exports = { totalLikes, favoriteBlog, mostBlogs, mostLikes }

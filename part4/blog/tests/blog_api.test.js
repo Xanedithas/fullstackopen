@@ -1,140 +1,186 @@
-const mongoose = require('mongoose')
-const supertest = require('supertest')
-const app = require('../app')
+const mongoose = require("mongoose")
+const supertest = require("supertest")
+const app = require("../app")
 const api = supertest(app)
 const Blog = require("../models/blog")
+const User = require("../models/user")
 
-const mock = [
-    {
-        "title": "The beginning",
-        "author": "Mike",
-        "url": "https://fullstackopen.com/static/f800638504cdf371a12947fc31d52030/part-4.svg",
-        "likes": 2
-    },
-    {
-        "title": "The end",
-        "author": "Mike",
-        "url": "https://fullstackopen.com/static/f800638504cdf371a12947fc31d52030/part-4.svg",
-    }
-]
-
-const mockPut = {
-    "title": "The beginning of the end",
-    "author": "Mike",
-    "url": "https://fullstackopen.com/static/f800638504cdf371a12947fc31d52030/part-4.svg",
-    "likes": 8
-}
-
-const invalidMock = {
-    "author": "Mike",
-    "likes": 6
-}
-
-/*beforeEach(async () => {
+/*
+beforeEach(async () => {
     await Blog.deleteMany({})
-
-    const blogObjects = // get blogs
-        .map(blog => new Blog(blog))
-    const promiseArray = blogObjects.map(blog => blog.save())
-    await Promise.all(promiseArray)
-})*/
-
-test('database is empty', async () => {
-    await Blog.deleteMany({})
-    const res = await api.get('/api/blogs')
-    expect(res.body).toHaveLength(0)
 })
+*/
 
-describe('when post blog', () => {
+// Status: Currently any "authorized" user can create, update, and remove any post.
 
-    test('blogs can be added', async () => {
-        await api
-            .post('/api/blogs')
-            .send(mock[0])
-            .expect(201)
-    
-        await api
-            .post('/api/blogs')
-            .send(mock[1])
-            .expect(201)
-    })
-    
-    test('title and url are required', async () => {
-        await api
-            .post('/api/blogs')
-            .send(invalidMock)
-            .expect(400)
-    })
+describe("when user post blog", () => {
 
-})
+	const username = "Pokeball"
+	const name = "Ash Ketchum"
+	const password = "P1k4chu!"
 
-describe('when get blogs', () => {
+	let token = ""
 
-    // Tests run in series flag: --runInBand
-    // State for following functions can be shared so we only perform 1 request
-    let res = {}
-    
-    test('mock blogs are returned', async () => {
-        res = await api.get('/api/blogs')
-        expect(res.body).toHaveLength(mock.length)
-    })
+	let entry = {
+		title: "Advanced automated testing on the backend",
+		url: "127.0.0.1:3001/api/"
+	}
 
-    test('blogs are returned as json', async () => {
-        expect(res.status).toBe(200)
-        expect(res.type).toBe('application/json')
-    })
+	test("empty database", async () => {
+		await Blog.deleteMany({})
+		await User.deleteMany({})
+		await api
+			.get("/api/blogs")
+			.expect(200)
+			.expect(res => res.body.length === 0)
+		await api
+			.get("/api/users")
+			.expect(200)
+			.expect(res => res.body.length === 0)
+	})
 
-    test('blogs without likes member has 0 likes', async () => {
-        expect(res.body[0].likes).toBe(2)
-        expect(res.body[1].likes).toBeDefined()
-        expect(res.body[1].likes).toBe(0)
-    })
+	test("register user", async () => {
+		await api
+			.post("/api/users")
+			.send({ username, name, password })
+			.expect(201)
+	})
 
-    test('id is defined on returned blogs', async () => {
-        expect(res.body[0].id).toBeDefined()
-    })
+	test("receive token on login", async () => {
+		const login = await api
+			.post("/api/login")
+			.send({ username, password })
+			.expect(200)
+		token = login.body.token
+	})
 
-})
+	test("unauthorized user cannot add blog", async () => {
+		await api
+			.post("/api/blogs")
+			.send(entry)
+			.expect(401)
+	})
 
-describe('when put blog', () => {
+	test("authorized user can add blog", async () => {
+		await api
+			.post("/api/blogs")
+			.send(entry)
+			.set("Authorization", `bearer ${token}`)
+			.expect(201)
+	})
 
-    let updated = { ...mockPut }
-    
-    test('put blog', async () => {
-        const old = await api.get('/api/blogs')
-        updated.id = old.body[1].id
-        await api
-            .put(`/api/blogs/${updated.id}`)
-            .send(updated)
-            .expect(200)
-    })
-    
-    test('updated blog is returned', async () => {
-        const res = await api.get('/api/blogs')
-        expect(res.body[1]).toEqual(updated)
-    })
+	test("title and url are required", async () => {
+		await api
+			.post("/api/blogs")
+			.send({ ...entry.title })
+			.set("Authorization", `bearer ${token}`)
+			.expect(400)
+		await api
+			.post("/api/blogs")
+			.send({ ...entry.url })
+			.set("Authorization", `bearer ${token}`)
+			.expect(400)
+	})
 
-})
+	test("blog exists", async () => {
+		await api
+			.get("/api/blogs")
+			.expect(200)
+			.expect("Content-Type", "application/json; charset=utf-8")
+			.expect(res => {
+				res.body.length === 1 &&
+				res.body[0].id !== null &&
+				res.body[0].likes === 0
+			})
+	})
 
-describe('when delete blog', () => {
+	test("user is populated in blog", async () => {
+		await api
+			.get("/api/blogs")
+			.expect(200)
+			.expect(res => res.body[0].author.username === username)
+	})
 
-    test('blogs can be removed', async () => {
-        const res = await api.get('/api/blogs')
-        await api
-            .delete(`/api/blogs/${res.body[1].id}`)
-            .expect(204)
-        await api
-            .delete(`/api/blogs/${res.body[0].id}`)
-            .expect(204)
-    })
-    
-    test('database is empty', async () => {
-        const res = await api.get('/api/blogs')
-        expect(res.body).toHaveLength(0)
-    })
+	test("blogs are populated in user", async () => {
+		await api
+			.get("/api/users")
+			.expect(200)
+			.expect(res => res.body[0].blogs[0].title === entry.title)
+	})
 
+	test("unauthorized user cannot update blog", async () => {
+		const blogs = await api.get("/api/blogs")
+		const blog = blogs.body[0]
+		const newTitle = entry.title + "!!!"
+
+		await api
+			.put(`/api/blogs/${blog.id}`)
+			.send({ title: newTitle })
+			.expect(401)
+	})
+
+	test("authorized user can update blog", async () => {
+		const blogs = await api.get("/api/blogs")
+		const blog = blogs.body[0]
+		const newTitle = entry.title + "!!!"
+
+		await api
+			.put(`/api/blogs/${blog.id}`)
+			.send({ title: newTitle })
+			.set("Authorization", `bearer ${token}`)
+			.expect(200)
+
+		await api
+			.get("/api/blogs")
+			.expect(200)
+			.expect(res => res.body[0].title === newTitle)
+	})
+
+	test("unauthorized user cannot remove blog", async () => {
+		const blogs = await api.get("/api/blogs")
+
+		await api
+			.delete(`/api/blogs/${blogs.body[0].id}`)
+			.expect(401)
+	})
+
+	// Functionality for authorization of removing and updating a blog is shared, no need to test twice.
+	test("only the author can remove blog", async () => {
+		const faux = { username: "alan", password: "turing" }
+		// Register a new user for this test
+		await api
+			.post("/api/users")
+			.send(faux)
+			.expect(201)
+
+		// Get token for this new user
+		const login = await api
+			.post("/api/login")
+			.send(faux)
+			.expect(200)
+
+		const blogs = await api.get("/api/blogs")
+
+		await api
+			.delete(`/api/blogs/${blogs.body[0].id}`)
+			.set("Authorization", `bearer ${login.body.token}`)
+			.expect(401)
+	})
+
+	test("authorized user can remove blog", async () => {
+		const blogs = await api.get("/api/blogs")
+
+		await api
+			.delete(`/api/blogs/${blogs.body[0].id}`)
+			.set("Authorization", `bearer ${token}`)
+			.expect(204)
+
+		await api
+			.get("/api/blogs")
+			.expect(res => res.body.length === 0)
+	})
 })
 
 afterAll(() => {
-    mongoose.connection.close()
+	mongoose.connection.close()
 })
